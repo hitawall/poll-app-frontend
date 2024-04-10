@@ -23,7 +23,7 @@ function SignUp() {
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const res = await axios.post('/api/signup', formData);
+//       const res = await axios.post('/api/signup', formData);
       console.log(res.data); // handle success
     } catch (err) {
       console.error(err.response.data); // handle error
