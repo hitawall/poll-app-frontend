@@ -5,8 +5,11 @@ import Link from 'next/link';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import axios from "axios";
+import { useRouter } from 'next/navigation';
+
 
 const LoginPage = () => {
+  const router = useRouter();
   const formik = useFormik({
     initialValues: {
       email: '',
@@ -16,16 +19,18 @@ const LoginPage = () => {
       email: yup.string('Enter your email').email('Enter a valid email').required('Email is required'),
       password: yup.string('Enter your password').min(8, 'Password should be of minimum 8 characters length').required('Password is required'),
     }),
-     onSubmit: async (values) => {
+     onSubmit: async (values, { setSubmitting }) => {
       try {
         const response = await axios.post('http://localhost:8080/login', values);
-        // Handle response here, e.g., storing auth tokens, redirecting, etc.
-        console.log('Login successful', response.data);
+        if (response.status==200) {
+          // Postpone navigation until after the state update has occurred
+          setSubmitting(true); // Assuming you handle the submitting state
+          router.push('/greeting');
+        }
       } catch (error) {
-        // Handle error here, e.g., showing error messages
         console.error('Login failed', error.response ? error.response.data : error.message);
       }
-      },
+    },
   });
 
   return (

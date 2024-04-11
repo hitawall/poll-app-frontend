@@ -5,10 +5,14 @@ import { Button, Box, Container, TextField, Typography, CssBaseline } from '@mui
 import Link from 'next/link';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
+import axios from "axios";
+import { useRouter } from 'next/navigation';
 
 const SignupPage = () => {
+  const router = useRouter();
   const formik = useFormik({
     initialValues: {
+      name: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -17,11 +21,29 @@ const SignupPage = () => {
       email: yup.string('Enter your email').email('Enter a valid email').required('Email is required'),
       password: yup.string('Enter your password').required('Password is required').min(8, 'Password should be of minimum 8 characters length'),
       confirmPassword: yup.string('Confirm your password').required('Confirm your password').oneOf([yup.ref('password'), null], 'Passwords must match'),
+      name: yup.string().required(),
     }),
-    onSubmit: (values) => {
-      console.log(values);
-      // Place your signup logic here
-    },
+    onSubmit: async (values, { setSubmitting }) => {
+      console.log("Calling signup...");
+      try {
+        const response = await axios.post('http://localhost:8080/signup', {
+          email: values.email,
+          name: values.name,
+          password: values.password,
+        });
+
+        if (response.status === 201) {
+          // Signup was successful
+          console.log('Signup successful');
+          router.push('/login'); // Redirect to a greeting page or similar
+        } else {
+          // Handle responses that may indicate unsuccessful signup attempts
+          console.error('Signup was unsuccessful');
+        }
+      } catch (error) {
+        console.error('An error occurred during signup:', error.response ? error.response.data : error.message);
+      }
+    }
   });
 
   return (
@@ -41,6 +63,24 @@ const SignupPage = () => {
           Sign Up
         </Typography>
         <form onSubmit={formik.handleSubmit} style={{ width: '100%' }}>
+          <TextField
+            fullWidth
+            id="name"
+            name="name"
+            label="Name"
+            value={formik.values.name}
+            onChange={formik.handleChange}
+            error={formik.touched.name && Boolean(formik.errors.name)}
+            helperText={formik.touched.name && formik.errors.name}
+            margin="normal"
+            variant="outlined"
+            InputLabelProps={{
+              style: { color: '#fff' },
+            }}
+            InputProps={{
+              style: { color: '#fff' },
+            }}
+          />
           <TextField
             fullWidth
             id="email"
