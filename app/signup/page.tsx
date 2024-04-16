@@ -1,12 +1,13 @@
 // app/signup/page.tsx
 'use client'
 
+import React from 'react';
+import axios from "axios";
+import { useRouter } from 'next/navigation';
 import { Button, Box, Container, TextField, Typography, CssBaseline } from '@mui/material';
 import Link from 'next/link';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
-import axios from "axios";
-import { useRouter } from 'next/navigation';
 
 const SignupPage = () => {
   const router = useRouter();
@@ -18,32 +19,39 @@ const SignupPage = () => {
       confirmPassword: '',
     },
     validationSchema: yup.object({
+      name: yup.string().required('Name is required'),
       email: yup.string('Enter your email').email('Enter a valid email').required('Email is required'),
       password: yup.string('Enter your password').required('Password is required').min(8, 'Password should be of minimum 8 characters length'),
       confirmPassword: yup.string('Confirm your password').required('Confirm your password').oneOf([yup.ref('password'), null], 'Passwords must match'),
-      name: yup.string().required(),
     }),
     onSubmit: async (values, { setSubmitting }) => {
       console.log("Calling signup...");
+      setSubmitting(true); // Enable submitting state immediately
+
       try {
         const response = await axios.post('http://localhost:8080/signup', {
           email: values.email,
           name: values.name,
           password: values.password,
+        }, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
         });
 
+        console.log('Response:', response); // Log the response to debug
         if (response.status === 201) {
-          // Signup was successful
           console.log('Signup successful');
-          router.push('/login'); // Redirect to a greeting page or similar
+          router.push('/login'); // Redirect to the login page on successful signup
         } else {
-          // Handle responses that may indicate unsuccessful signup attempts
-          console.error('Signup was unsuccessful');
+          console.error('Signup was unsuccessful', response.status);
         }
       } catch (error) {
         console.error('An error occurred during signup:', error.response ? error.response.data : error.message);
+      } finally {
+        setSubmitting(false); // Disable submitting state after operation
       }
-    }
+    },
   });
 
   return (
@@ -137,7 +145,7 @@ const SignupPage = () => {
               style: { color: '#fff' },
             }}
           />
-          <Button color="primary" variant="contained" fullWidth type="submit" sx={{ mt: 3, mb: 2, backgroundColor: '#556cd6' }}>
+          <Button disabled={formik.isSubmitting} color="primary" variant="contained" fullWidth type="submit" sx={{ mt: 3, mb: 2, backgroundColor: '#556cd6' }}>
             Sign Up
           </Button>
         </form>

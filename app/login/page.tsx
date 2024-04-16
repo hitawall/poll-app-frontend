@@ -1,12 +1,12 @@
 // app/login/page.tsx
 'use client'
+import React from 'react';
+import axios from "axios";
+import { useRouter } from 'next/navigation';
 import { Button, Box, Container, TextField, Typography, CssBaseline } from '@mui/material';
 import Link from 'next/link';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
-import axios from "axios";
-import { useRouter } from 'next/navigation';
-
 
 const LoginPage = () => {
   const router = useRouter();
@@ -19,16 +19,27 @@ const LoginPage = () => {
       email: yup.string('Enter your email').email('Enter a valid email').required('Email is required'),
       password: yup.string('Enter your password').min(8, 'Password should be of minimum 8 characters length').required('Password is required'),
     }),
-     onSubmit: async (values, { setSubmitting }) => {
+    onSubmit: async (values, { setSubmitting }) => {
+      setSubmitting(true); // Disable form elements while submitting
       try {
-        const response = await axios.post('http://localhost:8080/login', values);
-        if (response.status==200) {
-          // Postpone navigation until after the state update has occurred
-          setSubmitting(true); // Assuming you handle the submitting state
-          router.push('/greeting');
+        const response = await axios.post('http://localhost:8080/login', values, {
+  headers: {
+    'Content-Type': 'application/json'
+  }});
+        if (response.status === 200) {
+          // Assuming JWT is returned in response.data.token
+          localStorage.setItem('token', response.data.token);  // Save the token
+          router.push('/greeting'); // Redirect to the greeting page
+        } else {
+          // Handle non-200 responses if necessary
+          alert('Login failed: ' + response.statusText);
         }
       } catch (error) {
+        // Log and display error messages
         console.error('Login failed', error.response ? error.response.data : error.message);
+        alert('Login error: ' + (error.response ? error.response.data : 'Unknown error'));
+      } finally {
+        setSubmitting(false); // Re-enable form after submission
       }
     },
   });
@@ -87,7 +98,7 @@ const LoginPage = () => {
               style: { color: '#fff' },
             }}
           />
-          <Button color="primary" variant="contained" fullWidth type="submit" sx={{ mt: 3, mb: 2, backgroundColor: '#556cd6' }}>
+          <Button color="primary" variant="contained" fullWidth type="submit" disabled={formik.isSubmitting} sx={{ mt: 3, mb: 2, backgroundColor: '#556cd6' }}>
             Sign In
           </Button>
         </form>
