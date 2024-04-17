@@ -2,12 +2,12 @@
 'use client'
 
 import React from 'react';
-import axios from "axios";
 import { useRouter } from 'next/navigation';
 import { Button, Box, Container, TextField, Typography, CssBaseline } from '@mui/material';
 import Link from 'next/link';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
+import axios from '../../components/axiosConfig';
 
 const SignupPage = () => {
   const router = useRouter();
@@ -29,14 +29,10 @@ const SignupPage = () => {
       setSubmitting(true); // Enable submitting state immediately
 
       try {
-        const response = await axios.post('http://localhost:8080/signup', {
+        const response = await axios.post('/signup', {
           email: values.email,
           name: values.name,
           password: values.password,
-        }, {
-          headers: {
-            'Content-Type': 'application/json'
-          }
         });
 
         console.log('Response:', response); // Log the response to debug
