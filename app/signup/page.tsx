@@ -42,7 +42,8 @@ const SignupPage = () => {
         console.log('Response:', response); // Log the response to debug
         if (response.status === 201) {
           console.log('Signup successful');
-          router.push('/login'); // Redirect to the login page on successful signup
+          await router.push('/login'); // Redirect to the login page on successful signup
+          alert('Successfully signed up! Please proceed to login.');
         } else {
           console.error('Signup was unsuccessful', response.status);
         }
