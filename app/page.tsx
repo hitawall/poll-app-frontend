@@ -7,10 +7,10 @@ export default function Home() {
     <Container component="main" style={{ maxWidth:"false", height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#333', color: '#fff' }}>
       <CssBaseline />
       <Typography variant="h2" component="h1" gutterBottom style={{ fontWeight: 'bold', color: '#61dafb', textShadow: '2px 2px #000' }}>
-        Welcome to Funky Polls!
+        Welcome to Make Your Polls!
       </Typography>
       <Typography variant="h5" style={{ marginBottom: '30px', color: '#fff', fontStyle: 'italic' }}>
-        Where every vote is a party!
+        Where every vote matters!
       </Typography>
       <Box>
         <Link href="/login" passHref>
