@@ -3,9 +3,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../../../components/axiosConfig';
 import { useRouter, useParams } from 'next/navigation';
-import { Button, Container, List, ListItem, Typography, TextField, Box, CssBaseline, LinearProgress, IconButton, Dialog, DialogTitle, DialogContent, List as DialogList, ListItem as DialogListItem } from '@mui/material';
+import { Button, Container, List, ListItem, Typography, TextField, Box, CssBaseline, LinearProgress, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, List as DialogList, ListItem as DialogListItem } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { red } from '@mui/material/colors';
 
 const PollDetailPage = () => {
     const router = useRouter();
@@ -16,6 +18,7 @@ const PollDetailPage = () => {
     const [newOptionText, setNewOptionText] = useState('');
     const [voterDialogOpen, setVoterDialogOpen] = useState(false);
     const [currentVoters, setCurrentVoters] = useState([]);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [selectedOptionId, setSelectedOptionId] = useState(null);
 
     useEffect(() => {
@@ -84,6 +87,21 @@ const PollDetailPage = () => {
         }
     };
 
+    const handleDeleteOption = async (optionId) => {
+        try {
+            await axios.delete(`/options/${optionId}`);
+            setDeleteDialogOpen(false);
+            fetchPoll();
+        } catch (error) {
+            console.error('Failed to delete option:', error);
+        }
+    };
+
+    const confirmDeleteOption = (optionId) => {
+        setSelectedOptionId(optionId);
+        setDeleteDialogOpen(true);
+    };
+
     if (loading) {
         return <Container maxWidth="sm"><Typography>Loading...</Typography></Container>;
     }
@@ -122,6 +140,9 @@ const PollDetailPage = () => {
                                 <IconButton onClick={() => startEditing(option.id, option.text)} sx={{ color: '#fff' }}>
                                     <EditIcon />
                                 </IconButton>
+                                <IconButton onClick={() => confirmDeleteOption(option.id)} sx={{ color: red[500] }}>
+                                    <DeleteIcon />
+                                </IconButton>
                             </>
                         )}
                     </ListItem>
@@ -142,6 +163,16 @@ const PollDetailPage = () => {
                     />
                 </Box>
             </List>
+            <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+                <DialogTitle>Delete Option</DialogTitle>
+                <DialogContent>
+                    <Typography>Are you sure you want to delete this option?</Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDeleteDialogOpen(false)} color="primary">Cancel</Button>
+                    <Button onClick={() => handleDeleteOption(selectedOptionId)} color="secondary">Delete</Button>
+                </DialogActions>
+            </Dialog>
             <Dialog open={voterDialogOpen} onClose={() => setVoterDialogOpen(false)}>
                 <DialogTitle>Voters</DialogTitle>
                 <DialogContent>
