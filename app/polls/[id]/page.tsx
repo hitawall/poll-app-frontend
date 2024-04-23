@@ -8,6 +8,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { red } from '@mui/material/colors';
+import VotersDialog from "@/components/VotersDialog";
 
 const PollDetailPage = () => {
     const router = useRouter();
@@ -31,7 +32,14 @@ const PollDetailPage = () => {
         try {
             const response = await axios.get(`/polls/${id}`);
             const options = response.data.edges.polloptions;
-            const totalVotes = 10
+            const totalVotes = 10;
+            const voteStatusPromises = options.map(option => axios.get(`/options/${option.id}/voters`));
+
+            const votersResponses = await Promise.all(voteStatusPromises);
+            votersResponses.forEach((voterResponse, index) => {
+                options[index].hasVoted = voterResponse.data.hasVoted;
+            });
+
             options.forEach(option => option.percent = totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0);
             setPoll({ ...response.data, totalVotes, options });
             setLoading(false);
@@ -40,6 +48,7 @@ const PollDetailPage = () => {
             setLoading(false);
         }
     };
+
 
     const handleVote = async (optionId) => {
         try {
@@ -53,12 +62,16 @@ const PollDetailPage = () => {
 
     const handleViewVoters = async (optionId) => {
         try {
-            const response = await axios.get(`/options/${optionId}/voters`);
-            setCurrentVoters(response.data);
-            setVoterDialogOpen(true);
-        } catch (error) {
-            console.error('Error fetching voters:', error);
-        }
+        const response = await axios.get(`/options/${optionId}/voters`);
+        console.log("Voters data received:", response.data); // To see the exact structure
+
+        // Set the current voters based on the 'voters' key in the response data
+        setCurrentVoters(response.data.voters); // Now correctly accessing the voters array
+        setVoterDialogOpen(true);
+    } catch (error) {
+        console.error('Error fetching voters:', error);
+        setCurrentVoters([]); // Ensure it's set to an empty array in case of error
+    }
     };
 
     const handleAddOption = async () => {
@@ -118,7 +131,7 @@ const PollDetailPage = () => {
                 {poll.edges.polloptions.map((option) => (
                     <ListItem key={option.id} sx={{
                         display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2,
-                        backgroundColor: selectedOptionId === option.id ? '#4caf50' : '#333', // Highlight selected option
+                        backgroundColor: option.hasVoted ? '#4caf50' : '#333', // Conditional background color
                         padding: '10px', borderRadius: '5px'
                     }}>
                         {editMode[option.id] ? (
@@ -173,16 +186,7 @@ const PollDetailPage = () => {
                     <Button onClick={() => handleDeleteOption(selectedOptionId)} color="secondary">Delete</Button>
                 </DialogActions>
             </Dialog>
-            <Dialog open={voterDialogOpen} onClose={() => setVoterDialogOpen(false)}>
-                <DialogTitle>Voters</DialogTitle>
-                <DialogContent>
-                    <DialogList>
-                        {currentVoters.map((voter) => (
-                            <DialogListItem key={voter.id}>{voter.name}</DialogListItem>
-                        ))}
-                    </DialogList>
-                </DialogContent>
-            </Dialog>
+            <VotersDialog open={voterDialogOpen} onClose={() => setVoterDialogOpen(false)} voters={currentVoters} />
         </Container>
     );
 };
