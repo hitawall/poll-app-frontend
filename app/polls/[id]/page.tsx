@@ -3,11 +3,29 @@
 import React, { useEffect, useState } from 'react';
 import axios from '../../../components/axiosConfig';
 import { useRouter, useParams } from 'next/navigation';
-import { Button, Container, List, ListItem, Typography, TextField, Box, CssBaseline, LinearProgress, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, List as DialogList, ListItem as DialogListItem } from '@mui/material';
+import {
+    Button,
+    Container,
+    List,
+    ListItem,
+    Typography,
+    TextField,
+    Box,
+    CssBaseline,
+    LinearProgress,
+    IconButton,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    List as DialogList,
+    ListItem as DialogListItem,
+    Tooltip, Chip
+} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { red } from '@mui/material/colors';
+import {red, yellow} from '@mui/material/colors';
 import VotersDialog from "@/components/VotersDialog";
 
 const PollDetailPage = () => {
@@ -149,7 +167,13 @@ const PollDetailPage = () => {
                                     <LinearProgress variant="determinate" value={option.percent} sx={{ height: 10, backgroundColor: '#bbb' }} />
                                     <Typography>{option.text}</Typography>
                                 </Box>
-                                <Typography sx={{ minWidth: 35 }} onClick={() => handleViewVoters(option.id)}>{option.votes || 0}</Typography>
+                                <Tooltip title="Click to see who voted" placement="top">
+                                    <Chip
+                                        label={option.votes || 0}
+                                        onClick={() => handleViewVoters(option.id)}
+                                        sx={{ cursor: 'pointer', backgroundColor: yellow[700], color: '#fff' }}
+                                    />
+                                </Tooltip>
                                 <IconButton onClick={() => startEditing(option.id, option.text)} sx={{ color: '#fff' }}>
                                     <EditIcon />
                                 </IconButton>
