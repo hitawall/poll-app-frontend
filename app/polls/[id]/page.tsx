@@ -56,12 +56,28 @@ const PollDetailPage = () => {
 
   const handleVote = async (optionId) => {
     try {
+      const response = await axios.get(`/options/${optionId}/voters`);
+      if(response.data.hasVoted === true)
+      {
+        await axios.post(`/options/${optionId}/devote`);
+        fetchPoll();
+      }
+      else
+      {
+        try {
       await axios.post(`/options/${optionId}/vote`);
       setSelectedOptionId(optionId);
       fetchPoll();
     } catch (error) {
       console.error('Error recording vote:', error);
     }
+      }
+    }
+    catch (error)
+    {
+       console.error('Handling Vote - Error fetching voters:', error);
+    }
+
   };
 
   const handleViewVoters = async (optionId) => {

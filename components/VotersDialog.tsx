@@ -33,7 +33,7 @@ const VotersDialog: React.FC<VotersDialogProps> = ({ open, onClose, voters }) =>
       <DialogContent dividers>
         <Paper variant="outlined" sx={{ maxHeight: 400, overflow: 'auto' }}>
           <List>
-            {voters.length > 0 ? (
+            {voters!=null && voters.length > 0 ? (
               voters.map((voter) => (
                 <ListItem key={voter.id}>
                   <ListItemAvatar>
