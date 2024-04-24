@@ -26,7 +26,7 @@ const PollDetailPage = () => {
   const [currentVoters, setCurrentVoters] = useState([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedOptionId, setSelectedOptionId] = useState(null);
-  const [totalVotes, setTotalVotes] = useState(10);
+
   useEffect(() => {
     if (!id) return;
     fetchPoll();
@@ -44,7 +44,29 @@ const PollDetailPage = () => {
         options[index].hasVoted = voterResponse.data.hasVoted;
       });
 
-      options.forEach(option => option.percent = totalVotes > 0 ? (option.vote_count / totalVotes) * 100 : 0);
+      var totalVotes = 0;
+
+      options.forEach(option =>{
+        // Use Number to ensure it's a numeric value and default to 0 if not
+    const votes = Number(option.vote_count) || 0;
+    console.log("Votes for this option: " + votes);
+    totalVotes += votes;
+    console.log("Total Votes Now: " + totalVotes);
+      });
+
+
+     if (totalVotes > 0) {  // Check to prevent division by zero
+    options.forEach(option => {
+        const votes = Number(option.vote_count) || 0;
+        option.percent = (votes / totalVotes) * 100;
+        console.log("Percentage for this option: " + option.percent + "%");
+    });
+} else {
+    options.forEach(option => {
+        option.percent = 0;
+    });
+}
+
       setPoll({ ...response.data, totalVotes, options });
       setLoading(false);
     } catch (error) {
