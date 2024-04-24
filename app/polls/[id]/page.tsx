@@ -26,7 +26,7 @@ const PollDetailPage = () => {
   const [currentVoters, setCurrentVoters] = useState([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedOptionId, setSelectedOptionId] = useState(null);
-
+  const [totalVotes, setTotalVotes] = useState(10);
   useEffect(() => {
     if (!id) return;
     fetchPoll();
@@ -37,7 +37,6 @@ const PollDetailPage = () => {
     try {
       const response = await axios.get(`/polls/${id}`);
       const options = response.data.edges.polloptions;
-      const totalVotes = 10; // This should be dynamic, based on actual votes
       const voteStatusPromises = options.map(option => axios.get(`/options/${option.id}/voters`));
 
       const votersResponses = await Promise.all(voteStatusPromises);
@@ -45,7 +44,7 @@ const PollDetailPage = () => {
         options[index].hasVoted = voterResponse.data.hasVoted;
       });
 
-      options.forEach(option => option.percent = totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0);
+      options.forEach(option => option.percent = totalVotes > 0 ? (option.vote_count / totalVotes) * 100 : 0);
       setPoll({ ...response.data, totalVotes, options });
       setLoading(false);
     } catch (error) {
