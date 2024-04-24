@@ -165,7 +165,7 @@ const PollDetailPage = () => {
                 </Box>
                 <Tooltip title="Click to see who voted" placement="top">
                   <Chip
-                    label={option.votes || 0}
+                    label={option.vote_count || 0}
                     onClick={() => handleViewVoters(option.id)}
                     sx={{ cursor: 'pointer', backgroundColor: yellow[700], color: '#fff' }}
                   />
